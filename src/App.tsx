@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ReactPaginate from "react-paginate";
 import { fetchMovies } from "./services/movieService";
@@ -25,6 +25,12 @@ function App() {
 
     enabled: !!query,
   });
+
+  useEffect(() => {
+    if (isError) {
+      toast.error("Щось пішло не так при завантаженні фільмів!");
+    }
+  }, [isError]);
 
   // === HANDLERS ===
   const handleSearch = (newQuery: string) => {
