@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import ReactPaginate from "react-paginate";
 import { fetchMovies } from "../../services/movieService";
 import type { Movie } from "../../types/movie";
@@ -14,23 +14,25 @@ import css from "./App.module.css";
 function App() {
   const [query, setQuery] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   // === REACT QUERY ===
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, isPlaceholderData } = useQuery({
     queryKey: ["movies", query, page],
-
     queryFn: () => fetchMovies(query, page),
-
     enabled: !!query,
+    placeholderData: keepPreviousData,
   });
 
   useEffect(() => {
     if (isError) {
       toast.error("Щось пішло не так при завантаженні фільмів!");
     }
-  }, [isError]);
+
+    if (data && data.results.length === 0 && query && !isLoading) {
+      toast.error("No movies found for your search!");
+    }
+  }, [isError, data, query, isLoading]);
 
   // === HANDLERS ===
   const handleSearch = (newQuery: string) => {
@@ -41,7 +43,6 @@ function App() {
 
   const handlePageClick = ({ selected }: { selected: number }) => {
     setPage(selected + 1);
-
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -57,7 +58,7 @@ function App() {
 
       <SearchBar onSubmit={handleSearch} />
 
-      {isLoading && <Loader />}
+      {isLoading && !isPlaceholderData && <Loader />}
       {isError && <ErrorMessage />}
 
       {!isLoading && !isError && movies.length > 0 && (
