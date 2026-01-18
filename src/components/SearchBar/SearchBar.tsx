@@ -1,4 +1,4 @@
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import styles from "./SearchBar.module.css";
 
 interface SearchBarProps {
@@ -19,9 +19,6 @@ const SearchBar = ({ onSubmit }: SearchBarProps) => {
 
   return (
     <header className={styles.header}>
-      <div>
-        <Toaster />
-      </div>
       <form className={styles.form} action={handleAction}>
         <input
           className={styles.input}

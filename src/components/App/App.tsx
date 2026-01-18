@@ -16,7 +16,6 @@ function App() {
   const [page, setPage] = useState<number>(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  // === REACT QUERY ===
   const { data, isLoading, isError, isPlaceholderData } = useQuery({
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies(query, page),
@@ -29,10 +28,16 @@ function App() {
       toast.error("Щось пішло не так при завантаженні фільмів!");
     }
 
-    if (data && data.results.length === 0 && query && !isLoading) {
+    if (
+      data &&
+      data.results.length === 0 &&
+      query.trim() !== "" &&
+      !isLoading &&
+      !isPlaceholderData
+    ) {
       toast.error("No movies found for your search!");
     }
-  }, [isError, data, query, isLoading]);
+  }, [isError, data, query, isLoading, isPlaceholderData]);
 
   // === HANDLERS ===
   const handleSearch = (newQuery: string) => {
@@ -83,9 +88,13 @@ function App() {
         </>
       )}
 
-      {!isLoading && !isError && query && movies.length === 0 && (
-        <p style={{ textAlign: "center" }}>No movies found</p>
-      )}
+      {!isLoading &&
+        !isError &&
+        query &&
+        movies.length === 0 &&
+        !isPlaceholderData && (
+          <p style={{ textAlign: "center" }}>No movies found</p>
+        )}
 
       {selectedMovie && (
         <MovieModal movie={selectedMovie} onClose={closeModal} />
